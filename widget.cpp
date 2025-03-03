@@ -27,8 +27,6 @@
 
 #include <QStandardPaths>
 
-//#include <QDialog>
-
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
@@ -38,46 +36,37 @@ Widget::Widget(QWidget *parent)
 
     QGridLayout *layout = new QGridLayout;
 
-    // 0, 0 是网格布局中的行和列坐标。具体来说：0 是行号，表示这一项被放置在网格的第一行。0 是列号，表示这一项被放置在网格的第一列。
     layout->addWidget(previewGroupBox, 0, 0);
     layout->addWidget(datesGroupBox, 1, 0);
     layout->addWidget(rightGroupBox, 2, 0);
-    //layout->addLayout(layout, 0, 0);
 
-    // 设置网格布局的行列拉伸因子，确保各部分能够适应窗口大小变化
     layout->setRowStretch(0, 1);
-    layout->setRowStretch(1, 0);  // datesGroupBox 不需要拉伸
-    layout->setRowStretch(2, 0);  // rightGroupBox 不需要拉伸
+    layout->setRowStretch(1, 0);
+    layout->setRowStretch(2, 0);
     layout->setColumnStretch(0, 1);
 
     layout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(layout);
 
-    // 设置预览布局的最小行高和列宽，以及窗口标题
     previewLayout->setRowMinimumHeight(0, calendar->sizeHint().height());
     previewLayout->setColumnMinimumWidth(0, calendar->sizeHint().width());
 
     setWindowTitle(tr("Calendar Widget"));
 }
 
-// 槽函数，响应日期选择更改，将当前选定日期设置为 currentDateEdit 的日期
 inline void Widget::selectedDateChanged()
 {
     currentDateEdit->setDate(calendar->selectedDate());
-    calendar->setFocus();         // 确保日历部件获得焦点
-    calendar->update();           // 强制刷新日历部件
-    QApplication::processEvents(); // 强制刷新 UI
-
-    //currentDateEdit->setDate(calendar->selectedDate());
+    calendar->setFocus();
+    calendar->update();
+    QApplication::processEvents();
 }
 
-// 槽函数，响应最大日期更改，将日历的最大日期设置为新日期。
 inline void Widget::maximumDateChanged(QDate date)
 {
     calendar->setMaximumDate(date);
 }
 
-// 创建预览组框，包含一个日历部件，并设置日历的最小和最大日期，以及网格可见性。将日历部件添加到预览布局，并将布局设置为预览组框的布局。
 inline void Widget::createPreviewGroupBox()
 {
     previewGroupBox = new QGroupBox();
@@ -93,21 +82,17 @@ inline void Widget::createPreviewGroupBox()
     connect(calendar, &QCalendarWidget::selectionChanged, this, &Widget::selectedDateChanged);
 
     previewLayout = new QGridLayout;
-    //previewLayout->addWidget(calendar, 0, 0, Qt::AlignCenter);
     previewLayout->addWidget(calendar, 0, 0);
-    // 设置行列的拉伸因子，确保 calendar 能够填满整个布局
     previewLayout->setRowStretch(0, 1);
     previewLayout->setColumnStretch(0, 1);
 
     previewGroupBox->setLayout(previewLayout);
 
-    // 设置 calendar 的大小策略，确保它能够占用尽可能多的空间
     calendar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 inline void Widget::createDatesGroupBox()
 {
-    // 创建日期组框，包含两个日期编辑器（currentDateEdit 和 maximumDateEdit）及其标签（currentDateLabel 和 maximumDateLabel），并设置它们的显示格式、日期范围和初始日期。
     datesGroupBox = new QGroupBox();
 
     currentDateEdit = new QDateEdit;
@@ -127,9 +112,7 @@ inline void Widget::createDatesGroupBox()
     maximumDateLabel = new QLabel(tr("Ma&ximum Date:"));
     maximumDateLabel->setBuddy(maximumDateEdit);
 
-    // 连接信号和槽，将日期编辑器的日期更改信号连接到日历和 Widget 的相应槽函数。创建日期组框的网格布局，将组件添加到布局中，并设置布局。
     connect(currentDateEdit, &QDateEdit::dateChanged, calendar, &QCalendarWidget::setSelectedDate);
-    //connect(calendar, &QCalendarWidget::selectionChanged, this, &Widget::selectedDateChanged);
 
     connect(maximumDateEdit, &QDateEdit::dateChanged, this, &Widget::maximumDateChanged);
 
@@ -142,7 +125,6 @@ inline void Widget::createDatesGroupBox()
 
 void Widget::createRightInfoBar()
 {
-    // 创建右侧信息栏组框，包含一个标签，用于显示当前选定的日期。连接日历的选择更改信号到一个槽函数，该槽函数更新标签文本。
     rightGroupBox = new QGroupBox;
 
     QLabel *label = new QLabel(calendar->selectedDate().toString(Qt::ISODate));
@@ -151,7 +133,6 @@ void Widget::createRightInfoBar()
         label->setText("Selected Date : " + currentDateEdit->date().toString(Qt::ISODate));
     });
 
-    // 创建两个用于设置时间的 QSpinBox（小时和分钟），并连接它们的值更改信号到调试输出槽函数。
     QSpinBox *hourSpinBox = new QSpinBox;
     hourSpinBox->setRange(0, 23); // 小时的范围是 0 到 23
     hourSpinBox->setValue(QTime::currentTime().hour()); // 设置初始小时为当前小时
@@ -160,7 +141,6 @@ void Widget::createRightInfoBar()
         qDebug() << "First Hour SpinBox value changed : " << value;
     });
 
-    // 创建分钟输入框
     QSpinBox *minuteSpinBox = new QSpinBox;
     minuteSpinBox->setRange(0, 59); // 分钟的范围是 0 到 59
     minuteSpinBox->setValue(QTime::currentTime().minute()); // 设置初始分钟为当前分钟
@@ -177,7 +157,6 @@ void Widget::createRightInfoBar()
         qDebug() << "Second Hour SpinBox value changed : " << value;
     });
 
-    // 创建分钟输入框
     QSpinBox *minuteSpinBox2 = new QSpinBox;
     minuteSpinBox2->setRange(0, 59); // 分钟的范围是 0 到 59
     minuteSpinBox2->setValue(QTime::currentTime().minute()); // 设置初始分钟为当前分钟
@@ -186,12 +165,10 @@ void Widget::createRightInfoBar()
         qDebug() << "Second Minute SpinBox value changed : " << value;
     });
 
-    // 创建日志输入框
     QPlainTextEdit *logTextEdit = new QPlainTextEdit;
     logTextEdit->setPlaceholderText(tr("write here..."));
     logTextEdit->setMaximumHeight(125);
 
-    // new method
     // 在构造函数或合适的位置初始化保存路径
     QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(appDataPath);  // 确保目录存在
@@ -365,8 +342,6 @@ void Widget::createRightInfoBar()
 
         QPushButton *close = new QPushButton(tr("Close"));
 
-        // 创建新窗口来显示文件内容
-        //QDialog *viewDialog = new QDialog(this);
         QWidget *viewDialog = new QWidget();
 
         viewDialog->setWindowTitle(tr("File Contents"));
@@ -389,7 +364,6 @@ void Widget::createRightInfoBar()
         });
     });
 
-    // 将标签和日志输入框添加到右侧信息栏布局中
     rightLayout = new QGridLayout;
     rightLayout->addWidget(label);
 
@@ -413,11 +387,6 @@ void Widget::createRightInfoBar()
     buttongroupbox->setLayout(buttonlayout);
 
     rightLayout->addWidget(buttongroupbox);
-
-    // rightLayout->addWidget(saveButton);
-    // rightLayout->addWidget(calbutton);
-    // rightLayout->addWidget(cleanButton);
-    // rightLayout->addWidget(viewButton);
 
     rightGroupBox->setLayout(rightLayout);
 }
